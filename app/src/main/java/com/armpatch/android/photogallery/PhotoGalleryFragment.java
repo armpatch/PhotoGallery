@@ -1,6 +1,7 @@
 package com.armpatch.android.photogallery;
 
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -23,6 +24,7 @@ public class PhotoGalleryFragment extends Fragment {
 
     private RecyclerView mPhotoRecyclerView;
     private List<GalleryItem> mItems = new ArrayList<>();
+    private int resultPage = 1;
 
     public static PhotoGalleryFragment newInstance() {
         return new PhotoGalleryFragment();
@@ -44,6 +46,20 @@ public class PhotoGalleryFragment extends Fragment {
         mPhotoRecyclerView = v.findViewById(R.id.photo_recycler_view);
         mPhotoRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 3));
 
+        if (Build.VERSION.SDK_INT > 23) {
+            mPhotoRecyclerView.setOnScrollChangeListener(new View.OnScrollChangeListener() {
+                @Override
+                public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+                    if (!mPhotoRecyclerView.canScrollVertically(1)) {
+                        resultPage++;
+                        Log.i(TAG, "onScrollChange: page = " + resultPage);
+                        new FetchItemTask().execute();
+                        setupAdapter();
+                    }
+                }
+            });
+        }
+
         setupAdapter();
 
         return v;
@@ -52,6 +68,7 @@ public class PhotoGalleryFragment extends Fragment {
     private void setupAdapter() {
         if (isAdded()) {
             mPhotoRecyclerView.setAdapter(new PhotoAdapter(mItems));
+
         }
     }
 
@@ -99,7 +116,7 @@ public class PhotoGalleryFragment extends Fragment {
     private class FetchItemTask extends AsyncTask<Void,Void,List<GalleryItem>> {
         @Override
         protected List<GalleryItem> doInBackground(Void... params) {
-            return new FlickrFetchr().fetchItems();
+            return new FlickrFetchr().fetchItems(resultPage);
         }
 
         @Override

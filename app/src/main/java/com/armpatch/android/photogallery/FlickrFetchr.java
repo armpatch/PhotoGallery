@@ -17,8 +17,6 @@ import java.util.List;
 
 public class FlickrFetchr {
 
-
-
     private static final String TAG = "FlickrFetchr";
 
     public static final String API_KEY = "3dee13cd0d38d491d7a448104c32dc82";
@@ -36,7 +34,7 @@ public class FlickrFetchr {
             }
 
             int bytesRead = 0;
-            byte[] buffer = new byte[2024];
+            byte[] buffer = new byte[1024];
             while ((bytesRead = in.read(buffer)) > 0) {
                 out.write(buffer, 0, bytesRead);
             }
@@ -51,7 +49,7 @@ public class FlickrFetchr {
         return new String(getUrlBytes(urlSpec));
     }
 
-    public List<GalleryItem> fetchItems() {
+    public List<GalleryItem> fetchItems(int page) {
 
         List<GalleryItem> items = new ArrayList<>();
 
@@ -63,6 +61,7 @@ public class FlickrFetchr {
                     .appendQueryParameter("format", "json")
                     .appendQueryParameter("nojsoncallback", "1")
                     .appendQueryParameter("extras", "url_s")
+                    .appendQueryParameter("page", String.valueOf(page))
                     .build().toString();
             String jsonString = getUrlString(url);
             Log.i(TAG, "Received JSON: " + jsonString);
@@ -75,6 +74,10 @@ public class FlickrFetchr {
         }
 
         return items;
+    }
+
+    public List<GalleryItem> fetchItems() {
+        return fetchItems(1); //default returns first page
     }
 
     private void parseItems(List<GalleryItem> items, JSONObject jsonBody)
@@ -98,5 +101,4 @@ public class FlickrFetchr {
             items.add(item);
         }
     }
-
 }
