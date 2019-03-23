@@ -25,16 +25,12 @@ import java.util.List;
 
 public class PhotoGalleryFragment extends Fragment {
 
-    private static final String TAG = "PhotoGalleryFragment";
     public static final boolean returnsNewPageOnScroll = false;
-
-
+    private static final String TAG = "PhotoGalleryFragment";
     private RecyclerView mPhotoRecyclerView;
     private List<GalleryItem> mItems = new ArrayList<>();
     private ThumbnailDownloader<PhotoHolder> mThumbnailDownloader;
     private int resultPage = 1;
-
-
 
     public static PhotoGalleryFragment newInstance() {
         return new PhotoGalleryFragment();
@@ -92,7 +88,6 @@ public class PhotoGalleryFragment extends Fragment {
 
     @Override
     public void onDestroyView() {
-
         super.onDestroyView();
         mThumbnailDownloader.clearQueue();
     }
@@ -115,7 +110,6 @@ public class PhotoGalleryFragment extends Fragment {
 
         public PhotoHolder(View itemView) {
             super(itemView);
-
             mItemImageView = itemView.findViewById(R.id.item_image_view);
         }
 
@@ -154,7 +148,7 @@ public class PhotoGalleryFragment extends Fragment {
         }
     }
 
-    private class FetchItemTask extends AsyncTask<Void,Void,List<GalleryItem>> {
+    private class FetchItemTask extends AsyncTask<Void, Void, List<GalleryItem>> {
         @Override
         protected List<GalleryItem> doInBackground(Void... params) {
             return new FlickrFetchr().fetchItems(resultPage);
