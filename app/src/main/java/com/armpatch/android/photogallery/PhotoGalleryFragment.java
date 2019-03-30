@@ -1,5 +1,6 @@
 package com.armpatch.android.photogallery;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -29,12 +30,10 @@ import java.util.List;
 
 public class PhotoGalleryFragment extends Fragment {
 
-    public static final boolean returnsNewPageOnScroll = false;
     private static final String TAG = "PhotoGalleryFragment";
     private RecyclerView mPhotoRecyclerView;
     private List<GalleryItem> mItems = new ArrayList<>();
     private ThumbnailDownloader<PhotoHolder> mThumbnailDownloader;
-    private int resultPage = 1;
 
     public static PhotoGalleryFragment newInstance() {
         return new PhotoGalleryFragment();
@@ -71,20 +70,6 @@ public class PhotoGalleryFragment extends Fragment {
 
         mPhotoRecyclerView = v.findViewById(R.id.photo_recycler_view);
         mPhotoRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 3));
-
-        /*if (Build.VERSION.SDK_INT > 23 && returnsNewPageOnScroll) {
-            mPhotoRecyclerView.setOnScrollChangeListener(new View.OnScrollChangeListener() {
-                @Override
-                public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
-                    if (!mPhotoRecyclerView.canScrollVertically(1)) {
-                        resultPage++;
-                        Log.i(TAG, "onScrollChange: new ``page = " + resultPage);
-                        new FetchItemTask().execute();
-                        setupAdapter();
-                    }
-                }
-            });
-        }*/
 
         setupAdapter();
 
@@ -133,9 +118,15 @@ public class PhotoGalleryFragment extends Fragment {
             public void onClick(View v) {
                 String query = QueryPreferences.getStoredQuery(getActivity());
                 searchView.setQuery(query, false);
-                
             }
         });
+
+        MenuItem toggleItem = menu.findItem(R.id.menu_item_toggle_polling);
+        if (PollService.isServiceAlarmOn(getActivity())) {
+            toggleItem.setTitle(R.string.stop_polling);
+        } else {
+            toggleItem.setTitle(R.string.start_polling);
+        }
     }
 
     @Override
@@ -144,6 +135,11 @@ public class PhotoGalleryFragment extends Fragment {
             case R.id.menu_item_clear:
                 QueryPreferences.setStoredQuery(getActivity(), null);
                 updateItems();
+                return true;
+            case R.id.menu_item_toggle_polling:
+                boolean shouldStartAlarm = !PollService.isServiceAlarmOn(getActivity());
+                PollService.setServiceAlarm(getActivity(), shouldStartAlarm);
+                getActivity().invalidateOptionsMenu();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
