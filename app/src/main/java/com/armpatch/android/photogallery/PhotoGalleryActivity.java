@@ -2,7 +2,6 @@ package com.armpatch.android.photogallery;
 
 import android.content.Context;
 import android.content.Intent;
-import android.net.ConnectivityManager;
 import android.support.v4.app.Fragment;
 
 public class PhotoGalleryActivity extends SingleFragmentActivity {
